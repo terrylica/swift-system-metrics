@@ -26,7 +26,7 @@ extension SystemMetricsMonitor {
         public var interval: Duration
 
         /// String labels associated with the metrics
-        package let labels: SystemMetricsMonitor.Configuration.Labels
+        public var labels: Labels
 
         /// Additional dimensions attached to every metric
         package let dimensions: [(String, String)]
@@ -39,7 +39,7 @@ extension SystemMetricsMonitor {
             pollInterval interval: Duration = .seconds(15)
         ) {
             self.interval = interval
-            self.labels = .init()
+            self.labels = Labels()
             self.dimensions = []
         }
 
@@ -66,34 +66,22 @@ extension SystemMetricsMonitor.Configuration {
     ///
     /// Backend implementations can provide a static extension with
     /// defaults that suit their specific backend needs.
-    package struct Labels: Sendable {
-        /// Prefix for all other labels.
-        package var prefix: String = "process_"
+    public struct Labels: Sendable {
         /// Label for virtual memory size in bytes.
-        package var virtualMemoryBytes: String = "virtual_memory_bytes"
+        public var virtualMemoryBytes: String = "process_virtual_memory_bytes"
         /// Label for resident memory size in bytes.
-        package var residentMemoryBytes: String = "resident_memory_bytes"
+        public var residentMemoryBytes: String = "process_resident_memory_bytes"
         /// Label for process start time since UNIX epoch in seconds.
-        package var startTimeSeconds: String = "start_time_seconds"
+        public var startTimeSeconds: String = "process_start_time_seconds"
         /// Label for total user and system CPU time spent in seconds.
-        package var cpuSecondsTotal: String = "cpu_seconds_total"
+        public var cpuSecondsTotal: String = "process_cpu_seconds_total"
         /// Label for maximum number of open file descriptors.
-        package var maxFileDescriptors: String = "max_fds"
+        public var maxFileDescriptors: String = "process_max_fds"
         /// Label for number of open file descriptors.
-        package var openFileDescriptors: String = "open_fds"
-
-        /// Construct a label for a metric by concatenating the prefix with the corresponding label.
-        ///
-        /// - Parameters:
-        ///     - for: The property to construct the label for.
-        package func label(for keyPath: KeyPath<Labels, String>) -> String {
-            self.prefix + self[keyPath: keyPath]
-        }
+        public var openFileDescriptors: String = "process_open_fds"
 
         /// Create a new `Labels` instance with default values.
-        ///
-        package init() {
-        }
+        public init() {}
 
         /// Create a new `Labels` instance.
         ///
@@ -114,13 +102,12 @@ extension SystemMetricsMonitor.Configuration {
             maxFileDescriptors: String,
             openFileDescriptors: String
         ) {
-            self.prefix = prefix
-            self.virtualMemoryBytes = virtualMemoryBytes
-            self.residentMemoryBytes = residentMemoryBytes
-            self.startTimeSeconds = startTimeSeconds
-            self.cpuSecondsTotal = cpuSecondsTotal
-            self.maxFileDescriptors = maxFileDescriptors
-            self.openFileDescriptors = openFileDescriptors
+            self.virtualMemoryBytes = prefix + virtualMemoryBytes
+            self.residentMemoryBytes = prefix + residentMemoryBytes
+            self.startTimeSeconds = prefix + startTimeSeconds
+            self.cpuSecondsTotal = prefix + cpuSecondsTotal
+            self.maxFileDescriptors = prefix + maxFileDescriptors
+            self.openFileDescriptors = prefix + openFileDescriptors
         }
     }
 }
