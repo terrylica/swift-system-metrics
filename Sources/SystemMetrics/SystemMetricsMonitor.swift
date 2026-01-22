@@ -79,32 +79,32 @@ public struct SystemMetricsMonitor: Service {
         // Initialize gauges once to avoid repeated creation in updateMetrics()
         let effectiveMetricsFactory = metricsFactory ?? MetricsSystem.factory
         self.virtualMemoryBytesGauge = Gauge(
-            label: configuration.labels.label(for: \.virtualMemoryBytes),
+            label: configuration.labels.virtualMemoryBytes,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
         self.residentMemoryBytesGauge = Gauge(
-            label: configuration.labels.label(for: \.residentMemoryBytes),
+            label: configuration.labels.residentMemoryBytes,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
         self.startTimeSecondsGauge = Gauge(
-            label: configuration.labels.label(for: \.startTimeSeconds),
+            label: configuration.labels.startTimeSeconds,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
         self.cpuSecondsTotalGauge = Gauge(
-            label: configuration.labels.label(for: \.cpuSecondsTotal),
+            label: configuration.labels.cpuSecondsTotal,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
         self.maxFileDescriptorsGauge = Gauge(
-            label: configuration.labels.label(for: \.maxFileDescriptors),
+            label: configuration.labels.maxFileDescriptors,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
         self.openFileDescriptorsGauge = Gauge(
-            label: configuration.labels.label(for: \.openFileDescriptors),
+            label: configuration.labels.openFileDescriptors,
             dimensions: configuration.dimensions,
             factory: effectiveMetricsFactory
         )
