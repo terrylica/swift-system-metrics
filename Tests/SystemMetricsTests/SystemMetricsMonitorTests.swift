@@ -48,12 +48,12 @@ struct SystemMetricsMonitorTests {
             openFileDescriptors: "ofd"
         )
 
-        #expect(labels.label(for: \.virtualMemoryBytes) == "pfx+vmb")
-        #expect(labels.label(for: \.residentMemoryBytes) == "pfx+rmb")
-        #expect(labels.label(for: \.startTimeSeconds) == "pfx+sts")
-        #expect(labels.label(for: \.cpuSecondsTotal) == "pfx+cpt")
-        #expect(labels.label(for: \.maxFileDescriptors) == "pfx+mfd")
-        #expect(labels.label(for: \.openFileDescriptors) == "pfx+ofd")
+        #expect(labels.virtualMemoryBytes == "pfx+vmb")
+        #expect(labels.residentMemoryBytes == "pfx+rmb")
+        #expect(labels.startTimeSeconds == "pfx+sts")
+        #expect(labels.cpuSecondsTotal == "pfx+cpt")
+        #expect(labels.maxFileDescriptors == "pfx+mfd")
+        #expect(labels.openFileDescriptors == "pfx+ofd")
     }
 
     @Test("Configuration preserves all provided settings")
@@ -76,12 +76,12 @@ struct SystemMetricsMonitorTests {
 
         #expect(configuration.interval == .microseconds(123_456_789))
 
-        #expect(configuration.labels.label(for: \.virtualMemoryBytes) == "pfx_vmb")
-        #expect(configuration.labels.label(for: \.residentMemoryBytes) == "pfx_rmb")
-        #expect(configuration.labels.label(for: \.startTimeSeconds) == "pfx_sts")
-        #expect(configuration.labels.label(for: \.cpuSecondsTotal) == "pfx_cpt")
-        #expect(configuration.labels.label(for: \.maxFileDescriptors) == "pfx_mfd")
-        #expect(configuration.labels.label(for: \.openFileDescriptors) == "pfx_ofd")
+        #expect(configuration.labels.virtualMemoryBytes == "pfx_vmb")
+        #expect(configuration.labels.residentMemoryBytes == "pfx_rmb")
+        #expect(configuration.labels.startTimeSeconds == "pfx_sts")
+        #expect(configuration.labels.cpuSecondsTotal == "pfx_cpt")
+        #expect(configuration.labels.maxFileDescriptors == "pfx_mfd")
+        #expect(configuration.labels.openFileDescriptors == "pfx_ofd")
 
         #expect(configuration.dimensions.contains(where: { $0 == ("app", "example") }))
         #expect(configuration.dimensions.contains(where: { $0 == ("environment", "production") }))
