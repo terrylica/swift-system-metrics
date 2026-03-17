@@ -31,6 +31,7 @@ struct LinuxDataProviderTests {
         #expect(metrics.startTimeSeconds != 0)
         #expect(metrics.maxFileDescriptors != 0)
         #expect(metrics.openFileDescriptors != 0)
+        #expect(metrics.threadCount != 0)
     }
 
     @Test("Resident memory bytes reflects actual allocations")
@@ -106,7 +107,8 @@ struct LinuxDataProviderTests {
             startTimeSeconds: "sts",
             cpuSecondsTotal: "cpt",
             maxFileDescriptors: "mfd",
-            openFileDescriptors: "ofd"
+            openFileDescriptors: "ofd",
+            threadCount: "tc"
         )
         let configuration = SystemMetricsMonitor.Configuration(
             pollInterval: .seconds(1),
