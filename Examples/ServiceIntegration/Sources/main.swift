@@ -13,9 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import AsyncAlgorithms
+import Instrumentation
 import Logging
 import Metrics
-import MetricsTestKit
 import OTel
 import ServiceLifecycle
 import SystemMetrics
@@ -33,37 +33,79 @@ struct FooService: Service {
             for i in 0...1000 {
                 let k = i * j
                 self.logger.trace("FooService is still running", metadata: ["k": "\(k)"])
+                try await Task.sleep(for: .milliseconds(100))
             }
         }
         self.logger.notice("FooService done")
     }
 }
 
+func makeTelemetryService(
+    logger: Logger,
+    serviceName: String
+) throws -> (service: ServiceGroup, metricsFactory: any MetricsFactory) {
+    var otelConfig = OTel.Configuration.default
+    otelConfig.logs.enabled = false
+    otelConfig.metrics.enabled = true
+    otelConfig.traces.enabled = false
+    otelConfig.serviceName = serviceName
+    let otelMetricsBackend = try OTel.makeMetricsBackend(configuration: otelConfig)
+
+    // Configure SystemMetrics monitoring with an explicit metrics factory
+    let systemMetricsMonitor = SystemMetricsMonitor(
+        configuration: .init(pollInterval: .seconds(30)),
+        metricsFactory: otelMetricsBackend.factory,
+        logger: logger
+    )
+
+    // Create a named service group
+    let serviceGroup = ServiceGroup(
+        services: [
+            otelMetricsBackend.service,
+            systemMetricsMonitor,
+        ],
+        logger: logger,
+    )
+    let namedServiceConfiguration = ServiceGroupConfiguration.ServiceConfiguration(
+        service: serviceGroup,
+        serviceName: "Telemetry"
+    )
+    let serviceGroupConfiguration = ServiceGroupConfiguration(
+        services: [namedServiceConfiguration],
+        logger: logger
+    )
+    return (ServiceGroup(configuration: serviceGroupConfiguration), otelMetricsBackend.factory)
+}
+
 @main
 struct Application {
     static func main() async throws {
-        let logger = Logger(label: "Application")
+        let applicationName = "ServiceIntegrationExample"
+        let logger = Logger(label: applicationName)
 
-        // Bootstrap with some custom metrics backend
-        var otelConfig = OTel.Configuration.default
-        otelConfig.logs.enabled = false
-        otelConfig.serviceName = "ServiceIntegrationExample"
-        let otelService = try OTel.bootstrap(configuration: otelConfig)
+        // Initialize all telemetry services
+        let (telemetryService, metricsFactory) = try makeTelemetryService(
+            logger: logger,
+            serviceName: applicationName
+        )
 
         // Create a service simulating some important work
         let service = FooService(logger: logger)
-        let systemMetricsMonitor = SystemMetricsMonitor(
-            configuration: .init(pollInterval: .seconds(30)),
-            logger: logger
-        )
 
         let serviceGroup = ServiceGroup(
-            services: [service, systemMetricsMonitor, otelService],
+            services: [
+                telemetryService,
+                service,
+            ],
             gracefulShutdownSignals: [.sigint],
             cancellationSignals: [.sigterm],
             logger: logger
         )
 
-        try await serviceGroup.run()
+        // Use withMetricsFactory to make the OTel factory available as a task-local
+        // for any Metric objects created during the service group's run
+        try await withMetricsFactory(metricsFactory) {
+            try await serviceGroup.run()
+        }
     }
 }

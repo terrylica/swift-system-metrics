@@ -12,8 +12,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../.."),
-        .package(url: "https://github.com/apple/swift-metrics.git", from: "2.3.2"),
-        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0"),
+        .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.11.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/swift-otel/swift-otel", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
@@ -23,8 +22,6 @@ let package = Package(
             name: "ServiceIntegrationExample",
             dependencies: [
                 .product(name: "SystemMetrics", package: "swift-system-metrics"),
-                .product(name: "Metrics", package: "swift-metrics"),
-                .product(name: "MetricsTestKit", package: "swift-metrics"),
                 .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
                 .product(name: "UnixSignals", package: "swift-service-lifecycle"),
                 .product(name: "Logging", package: "swift-log"),
