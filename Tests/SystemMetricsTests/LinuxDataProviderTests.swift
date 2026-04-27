@@ -19,7 +19,11 @@ import Glibc
 
 import SystemMetrics
 
-@Suite("Linux Data Provider Tests")
+// This suite is serialized, as the tests involve exercising and
+// measuring process metrics, so running them concurrently can
+// make measurements flaky.
+
+@Suite("Linux Data Provider Tests", .serialized)
 struct LinuxDataProviderTests {
     @Test("Linux system metrics generation provides all required metrics")
     func systemMetricsGeneration() async throws {
@@ -125,6 +129,23 @@ struct LinuxDataProviderTests {
         #expect(metrics.startTimeSeconds > 0)
         #expect(metrics.maxFileDescriptors > 0)
         #expect(metrics.openFileDescriptors > 0)
+    }
+
+    @Test("File descriptor counts are accurate")
+    func openFileDescriptors() throws {
+        let metricsBefore = SystemMetricsMonitorDataProvider.linuxSystemMetrics()
+        let openBefore = try #require(metricsBefore?.openFileDescriptors)
+
+        let fd = open("/dev/null", O_RDONLY)
+        guard fd >= 0 else {
+            Issue.record("Failed to open /dev/null")
+            return
+        }
+        defer { close(fd) }
+
+        let metricsDuring = SystemMetricsMonitorDataProvider.linuxSystemMetrics()
+        let openDuring = try #require(metricsDuring?.openFileDescriptors)
+        #expect(openDuring == openBefore + 1)
     }
 }
 #endif
